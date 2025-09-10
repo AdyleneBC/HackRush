@@ -10,7 +10,7 @@ const config = {
     default: 'arcade',
     arcade: {
       gravity: { y: 0 }, // Establece la gravedad a 0 para que el personaje no caiga
-      debug: false // Cambia a true para ver los cuerpos de las físicas
+      debug: true // Cambia a true para ver los cuerpos de las físicas
     }
   }
 };
