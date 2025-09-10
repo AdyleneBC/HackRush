@@ -50,17 +50,14 @@ export class Enemigo {
         this.ataque=ataque;
         this.debilidad=debilidad
     }
-    recibirDanio(cantidad) {
-        let danio= cantidad;
-        if (this.defensa>0 && this.defensa<danio){
-            danio-=this.defensa;
-            this.vida -= danio;
-        } else {
-            this.vida-=danio
-            if(this.vida<=0){
-            console.log(`${this.nombre} ha sido derrotado.`);
+    recibirAtaque(comando) {
+        if(comando==this.debilidad){
+            vida=vida/2;
         }
     }
-  }
+    atacar(Objetivo){
+        Objetivo.recibirDanio(this.ataque);
+        console.log(`${this.nombre} ataca a ${Objetivo.nombre}`);
+    }
 
 }
