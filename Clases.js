@@ -11,10 +11,6 @@ export class Personaje {
     this.nivel += 1;
     console.log(`${this.nombre} ha subido al nivel ${this.nivel}!`);
   }
-  AgregarNombre(nombre) {
-    this.nombre = nombre;
-    console.log(`El nombre del personaje es ${this.nombre}`);
-  }
   atacar(Objetivo){
     Objetivo.recibirDanio(this.ataque);
     console.log(`${this.nombre} ataca a ${Objetivo.nombre}`);
@@ -44,4 +40,14 @@ export class Personaje {
     console.log(`Medallas: ${this.medallas}`);
     console.log(`----------------------------`);
   }
+}
+
+export class Enemigo {
+    constructor(nombre, vida, tipo, ataque, debilidad) {
+        this.nombre=nombre;
+        this.vida=vida;
+        this.tipo= tipo;
+        this.ataque=ataque;
+        this.debilidad=debilidad
+    }
 }

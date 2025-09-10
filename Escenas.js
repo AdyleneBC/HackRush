@@ -6,8 +6,8 @@ export class Escena extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('fondo', 'fondoInicio.png');
-    this.load.image('heroe', '/Personaje principal.jpg');
+    this.load.image('fondo', 'Assets/fondoInicio.png');
+    this.load.image('heroe', 'Assets/Personaje principal.jpg');
 
   }
 
@@ -39,7 +39,7 @@ export class Escena extends Phaser.Scene {
   update(time, delta) {
     this.heroeSprite.setVelocity(0);
 
-    while(this.heroe.vida!=0)
+    if(this.heroe.vida!=0)
     {
         if (this.cursors.left.isDown) {
             this.heroeSprite.setVelocityX(-160);
