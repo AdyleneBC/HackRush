@@ -78,7 +78,7 @@ export class Mazmorra1 extends Phaser.Scene {
 
     preload() {
         this.load.image('fondo', 'Assets/fondoInicio.png');
-         this.load.spritesheet('duende', 'Assets/duendes.png', {
+        this.load.spritesheet('duende', 'Assets/duendes.png', {
             frameWidth: 97, 
             frameHeight: 87
         });
@@ -106,26 +106,24 @@ export class Mazmorra1 extends Phaser.Scene {
         });
         this.anims.create({
             key: 'AnimacionMuerteDuende',
-            frames: this.anims.generateFrameNumbers('duende', { frames: [9,23,20] }),
-            frameRate: 3,
+            frames: this.anims.generateFrameNumbers('duende', { frames: [9,29,29] }),
+            frameRate: 0.6,
             repeat: 0
         }); 
 
         this.time.addEvent({
             delay: 3000,
-            loop: true,
+            loop: false,
             callback: () => {
-                if(this.duendes.getChildren().length<=10){
+                if(this.duendes.getChildren().length<1){
                     const centroX = this.heroeSprite.x;
-            const centroY = this.heroeSprite.y;
+                    const centroY = this.heroeSprite.y;
+                    const angle = Phaser.Math.FloatBetween(-Math.PI / 4, Math.PI / 4);
+                    const radius = Phaser.Math.Between(100, 150);
 
-            // Ángulo aleatorio en radianes
-            const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
-            // Radio de aparición (distancia desde el héroe)
-            const radius = Phaser.Math.Between(100, 150);
-
-            const x = centroX + Math.cos(angle) * radius;
-            const y = centroY + Math.sin(angle) * radius; 
+                    const x = centroX + Math.cos(angle) * radius;
+                    const y = centroY + Math.sin(angle) * radius;
+ 
                     this.crearDuende(x, y);   
                 }
                 
@@ -169,10 +167,15 @@ export class Mazmorra1 extends Phaser.Scene {
         sendBtn.addEventListener('click', () => {
             const commandInput = textarea.node.querySelector('#commandInput');
             const command = commandInput.value.toLowerCase().trim();
-            if(command=='select * from pociones where tipo="pocion1"'){
-                this.dragon.recibirAtaque('pocion1');
-                console.log(`¡Has atacado al dragón con la poción de fuego! ${this.dragon.vida} `);
-            }
+            if(command == 'select * from pociones where tipo="pocion1"') {
+    this.duendes.getChildren().forEach(sprite => {
+        if(sprite.enemigoRef && sprite.enemigoRef.vida > 0) {
+            sprite.enemigoRef.recibirAtaque('pocion1');
+            console.log(`¡Has atacado a un duende! Vida restante: ${sprite.enemigoRef.vida}`);
+        }
+    });
+}
+
             console.log('Comando enviado:', command);
             commandInput.value = '';
             textarea.setVisible(false); 
@@ -212,37 +215,53 @@ export class Mazmorra1 extends Phaser.Scene {
     }
 
     crearDuende(x, y) {
-    const duende = new Enemigo('Duende', 50, 'tierra', 10, 'pocion1');
+    const duende = new Enemigo('Duende', 10, 'tierra', 10, 'pocion1');
     const sprite = this.physics.add.sprite(x, y, 'duende', 9);
     sprite.setCollideWorldBounds(true);
+
     duende.sprite = sprite;
+    sprite.enemigoRef = duende; 
     this.duendes.add(sprite);
 
-    this.time.addEvent({
-        delay: 10000,  
+    // 🔴 Estado para evitar múltiples muertes
+    sprite.estaMuerto = false;
+
+    // Ataque automático
+    duende.attackEvent = this.time.addEvent({
+        delay: 3000,  
         loop: true,
         callback: () => {
-            if (duende.vida > 0) {
+            if (duende.vida > 0 && !sprite.estaMuerto) {
                 duende.atacar(this.heroe);
                 sprite.play('AnimacionAtaqueDuende');
-            }else {
-                duende.attackEvent.remove(false); 
             }
         }
     });
+
+    // 👉 REVISAR vida periódicamente
     this.time.addEvent({
-        delay: 100,
+        delay: 200,
         loop: true,
         callback: () => {
-            if (duende.vida <= 0) {
+            if (duende.vida <= 0 && !sprite.estaMuerto) {
+                sprite.estaMuerto = true; // marcar como muerto
                 sprite.play('AnimacionMuerteDuende');
-                sprite.once('animationcomplete', () => sprite.setVisible(false));
+                
+                // Esperar a que acabe la animación y luego eliminarlo
+                sprite.once('animationcomplete', (anim) => {
+                    if (anim.key === 'AnimacionMuerteDuende') {
+                        sprite.destroy(); // ahora sí lo borramos del juego
+                        console.log("💀 Duende eliminado");
+                    }
+                });
             }
         }
     });
 
     return duende;
-    }
+}
+
+
 
 }
 
