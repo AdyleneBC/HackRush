@@ -135,7 +135,7 @@ skipBtn.on('pointerout', () => {
         
       } catch (error) {
         console.error('Error al iniciar video:', error);
-        this.scene.start('EscenaJuego');
+        this.scene.start('Menu');
       }
     };
 
@@ -144,7 +144,7 @@ skipBtn.on('pointerout', () => {
     
     skipBtn.on('pointerdown', () => {
       console.log('Saltando intro...');
-      this.scene.start('EscenaJuego');
+      this.scene.start('Menu');
     });
 
     // Video events
@@ -155,7 +155,7 @@ skipBtn.on('pointerout', () => {
     });
     video.on('error', (error) => {
       console.error('❌ Video error:', error);
-      this.scene.start('EscenaJuego');
+      this.scene.start('Menu');
     });
   }
 }
