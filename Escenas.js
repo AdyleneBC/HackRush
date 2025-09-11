@@ -1,4 +1,6 @@
 import { Personaje, Enemigo } from './Clases.js';
+import { IntroScene } from './IntroScene.js'; /*Se agregó */
+
 
 export class Escena extends Phaser.Scene {
   constructor() {
@@ -49,6 +51,27 @@ export class Escena extends Phaser.Scene {
         personaje: this.heroe,
         });
     });
+
+
+/*Se agregó */
+    const btnTutorial = this.add.text(16, 16, 'Ver tutorial otra vez', {
+  fontFamily: 'Arial',
+  fontSize: '16px',
+  color: '#ffffff',
+  backgroundColor: '#00000088',
+  padding: { x: 10, y: 6 }
+}).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+
+btnTutorial.on('pointerdown', () => {
+  try { localStorage.removeItem('hr_seen_intro'); } catch {}
+  if (!this.scene.get('IntroScene')) {
+    this.scene.add('IntroScene', IntroScene, true); // lanza Intro
+  } else {
+    this.scene.launch('IntroScene');
+  }
+  this.scene.pause(); // pausa la escena actual mientras corre la Intro
+}); /*Termina */
+
   }
 
   update(time, delta) {
