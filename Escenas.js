@@ -6,7 +6,7 @@ export class Escena extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('fondo', 'Assets/fondoInicio.png'); 
+    this.load.image('fondo', 'Assets/fondo_inicial.jpg'); 
     this.load.image('camino', 'Assets/camino.png');
     this.load.spritesheet('heroe_abajo', 'Assets/abajo_heroe.png', {
         frameWidth: 135, 
@@ -36,8 +36,8 @@ export class Escena extends Phaser.Scene {
 
     ///delimitantes
     const platforms = this.physics.add.staticGroup();
-    platforms.create(370, 100, 'camino').setScale(0.05,2).refreshBody();
-    platforms.create(450, 300, 'camino').setScale(0.05,0.55).refreshBody();
+    platforms.create(370, 100, 'camino').setScale(0,0).refreshBody();
+    platforms.create(450, 300, 'camino').setScale(0,0).refreshBody();
 
     this.heroe = new Personaje(100, 20);
     this.heroeSprite = this.physics.add.sprite(400, 250, 'heroe_abajo', 0);
@@ -71,16 +71,10 @@ export class Escena extends Phaser.Scene {
         frameRate: 8,
         repeat: -1
     });
-
-    this.enemigo = new Enemigo('Orco', 50, 'tierra', 15, 'pocion1');
-    this.enemigoSprite = this.physics.add.sprite(500, 400, 'enemigo');
-    this.enemigoSprite.setCollideWorldBounds(true);
-    console.log(`El enemigo ${this.enemigo.nombre} está listo en la escena.`);
-
     this.cursors = this.input.keyboard.createCursorKeys();
      this.physics.add.collider(this.heroeSprite, platforms);
 
-    const botonMazmorra1 = this.add.text(400, 100, 'Mazmorra1', { 
+    const botonMazmorra1 = this.add.text(130, 250, 'Mazmorra1', { 
         fontSize: '18px', 
         fill: '#fff',
         backgroundColor: '#8B0000', 
@@ -154,6 +148,8 @@ export class Mazmorra1 extends Phaser.Scene {
         this.duendes = this.physics.add.group();
 this.duendesActivos = []; // array para guardar todos los duendes
 this.limiteDuendes = 3;  // máximo de duendes que pueden aparecer
+this.totalDuendesCreados = 0; // contador de duendes creados
+
 
         this.anims.create({
             key: 'AnimacionAtaqueDuende',
@@ -354,12 +350,11 @@ AreaTexto.addEventListener('blur', () => { this.input.keyboard.enabled = true; }
     duende.sprite = sprite;
     sprite.enemigoRef = duende;
     this.duendes.add(sprite);
-    this.duendesActivos.push(duende); // agregamos al array
+    this.duendesActivos.push(duende);
 
     sprite.estaMuerto = false;
     duende.congelado = congelado;
 
-    // Ataque automático solo si no está congelado
     duende.attackEvent = this.time.addEvent({
         delay: 8000,
         loop: true,
@@ -371,7 +366,6 @@ AreaTexto.addEventListener('blur', () => { this.input.keyboard.enabled = true; }
         }
     });
 
-    // Revisar vida periódicamente
     this.time.addEvent({
         delay: 200,
         loop: true,
@@ -380,20 +374,49 @@ AreaTexto.addEventListener('blur', () => { this.input.keyboard.enabled = true; }
                 sprite.estaMuerto = true;
                 sprite.play('AnimacionMuerteDuende');
                 sprite.once('animationcomplete', () => {
-                    sprite.destroy();
-                    // cuando muere un duende, generar uno nuevo si no se alcanzó el límite
-                    if (this.duendesActivos.length < this.limiteDuendes) {
-                        const newX = Phaser.Math.Between(100, 700);
-                        const newY = Phaser.Math.Between(100, 500);
-                        this.crearDuende(newX, newY);
-                    }
-                });
+    sprite.destroy();
+
+    // Remover duende del array
+    const index = this.duendesActivos.indexOf(duende);
+    if (index > -1) this.duendesActivos.splice(index, 1);
+
+    // Verificar si ya no quedan duendes activos y ya se crearon todos
+    if (this.duendesActivos.length === 0 && this.totalDuendesCreados >= this.limiteDuendes) {
+        this.finalizarNivel(); // función que muestra mensaje y botón
+    }
+
+    // Generar un nuevo duende si no se alcanzó el límite total
+    if (this.totalDuendesCreados < this.limiteDuendes) {
+        const newX = Phaser.Math.Between(100, 700);
+        const newY = Phaser.Math.Between(100, 500);
+        this.crearDuende(newX, newY);
+        this.totalDuendesCreados++;
+    }
+});
+
             }
         }
     });
 
     return duende;
 }
+
+// Método para mostrar mensaje de nivel completado
+finalizarNivel() {
+    const modal = this.add.dom(this.cameras.main.width/2, this.cameras.main.height/2)
+        .createElement('div', 'background-color: rgba(0,0,0,0.8); padding:20px; border-radius:10px; color:white; width:400px; text-align:center;')
+        .setHTML(`
+            <p>¡Felicidades! Has terminado el nivel.</p>
+            <button id="btnSalir">Volver al menú</button>
+        `);
+
+    const btnSalir = modal.node.querySelector('#btnSalir');
+    btnSalir.addEventListener('click', () => {
+        modal.destroy();
+        this.scene.start('EscenaJuego'); // vuelve a la escena principal
+    });
+}
+
 
 
 
