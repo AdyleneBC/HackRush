@@ -1,13 +1,11 @@
 // Archivo: main.js
 import { Escena, Mazmorra1 } from './Escenas.js';
->>>>>>> fer
 
 const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
   scene: [Escena,Mazmorra1], // Añade tu escena al array
->>>>>>> fer
   physics: {
     default: 'arcade',
     arcade: {
@@ -18,7 +16,6 @@ const config = {
   parent: 'phaser-game', // opcional si tienes un div
   dom: {
     createContainer: true   // 🔥 esto habilita DOM Elements
->>>>>>> fer
   }
 };
 
