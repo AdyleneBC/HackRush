@@ -151,7 +151,10 @@ export class Mazmorra1 extends Phaser.Scene {
         );
         this.heroeSprite.setScale(0.5);
 
-        this.duendes = this.physics.add.group(); 
+        this.duendes = this.physics.add.group();
+this.duendesActivos = []; // array para guardar todos los duendes
+this.limiteDuendes = 3;  // máximo de duendes que pueden aparecer
+
         this.anims.create({
             key: 'AnimacionAtaqueDuende',
             frames: this.anims.generateFrameNumbers('duende', { frames: [0,1,2,3] }),
@@ -165,7 +168,7 @@ export class Mazmorra1 extends Phaser.Scene {
             repeat: 0
         }); 
 
-        this.time.addEvent({
+        /*this.time.addEvent({
             delay: 3000,
             loop: false,
             callback: () => {
@@ -182,71 +185,137 @@ export class Mazmorra1 extends Phaser.Scene {
                 }
                 
             }
+        });*/
+
+        // Modal de introducción
+// 1️⃣ Modal inicial
+// Estado del tutorial
+let tutorialStep = 0; // 0 = mostrar primer modal, 1 = crear tabla, 2 = agregar pocion, 3 = select
+
+let duendeCongelado = null;
+
+// 1️⃣ Modal inicial: bienvenido
+const modalIntro = this.add.dom(this.cameras.main.width/2, this.cameras.main.height/2)
+    .createElement('div', 'background-color: rgba(0,0,0,0.8); padding:20px; border-radius:10px; color:white; width:400px; text-align:center;')
+    .setHTML(`
+        <p>¡Esta es la Mazmorra 1! Prepárate para enfrentarte a un duende.</p>
+        <button id="btnSiguiente">Siguiente</button>
+    `);
+
+const btnSiguiente = modalIntro.node.querySelector('#btnSiguiente');
+btnSiguiente.addEventListener('click', () => {
+    modalIntro.destroy();
+
+    // Crear duende congelado
+    const centroX = this.heroeSprite.x + 100;
+    const centroY = this.heroeSprite.y;
+    duendeCongelado = this.crearDuende(centroX, centroY, true);
+
+    // Paso siguiente: mostrar modal de instrucciones para crear la tabla
+    showNextModal();
+});
+
+// Crear textarea y botón
+const textarea = this.add.dom(400, 550).createElement('div', 'background-color:#333; padding:10px; border-radius:8px; display:none;')
+    .setHTML(`
+        <textarea id="commandInput" placeholder="Escribe un comando..." style="padding:5px; border:none; border-radius:4px; background-color:#555; color:white; width:250px; height:80px; resize:none;"></textarea>
+        <button id="sendBtn" style="padding:5px 10px; border:none; border-radius:4px; background-color:#4CAF50; color:white; margin-left:10px;">Enviar</button>
+    `);
+
+const AreaTexto = textarea.node.querySelector('#commandInput');
+const sendBtn = textarea.node.querySelector('#sendBtn');
+
+// Mostrar/ocultar textarea al presionar "Abrir libro"
+const botonComando = this.add.text(400, 500, 'Abrir libro', { fontSize:'18px', fill:'#fff', backgroundColor:'#333', padding:10 }).setOrigin(0.5);
+botonComando.setInteractive();
+botonComando.on('pointerdown', () => {
+    textarea.setVisible(!textarea.visible);
+    if(textarea.visible) AreaTexto.focus();
+});
+
+// Bloquear controles del teclado mientras escribes
+AreaTexto.addEventListener('focus', () => { this.input.keyboard.enabled = false; });
+AreaTexto.addEventListener('blur', () => { this.input.keyboard.enabled = true; });
+
+// Listener único de comando
+sendBtn.addEventListener('click', () => {
+    const command = AreaTexto.value.toLowerCase().trim();
+
+    if(tutorialStep === 1 && command === 'create table pociones (tipo nvarchar(50))') {
+        // Segundo modal: indica que agregues pocion
+        showNextModal();
+    } else if(tutorialStep === 2 && command === 'insert into pociones values ("pocion1")') {
+        // Tercer modal: indica que hagas select
+        this.heroe.agregarpocion('pocion1')
+        showNextModal();
+    } else if(tutorialStep === 3 && command === 'select * from pociones where tipo="pocion1"') {
+        // Activar duende
+        if(duendeCongelado) duendeCongelado.congelado = false;
+        console.log("¡Duende activado!");
+    }
+
+    // Ejecutar ataque a duendes si comando es select
+     // Ejecutar ataque a duendes si comando es select
+    if(command === 'insert into pociones values ("pocion1")') {
+        // Tercer modal: indica que hagas select
+        this.heroe.agregarpocion('pocion1')
+
+    }
+if(command === 'select * from pociones where tipo="pocion1"') {
+    if(this.heroe.buscarPocion('pocion1')) { 
+        // Eliminar la poción usada
+        this.heroe.usarPocion('pocion1');
+
+        // Atacar a todos los duendes vivos
+        this.duendes.getChildren().forEach(sprite => {
+            if(sprite.enemigoRef && sprite.enemigoRef.vida > 0) {
+                sprite.enemigoRef.recibirAtaque('pocion1');
+                alert(`¡Rapido inserta mas pociones con el comando insert into pociones values ("pocion1")`);
+                setTimeout(() => {
+                    alert(`¡De prisa mata a los duendes con el comando select * from pociones where tipo="pocion1"`);
+                }, 5000); // 1000 ms = 1 segundo
+                
+            }
         });
-
-
-
-        const botonComando = this.add.text(400, 500, 'Abrir libro', {
-            fontSize: '18px',
-            fill: '#fff',
-            backgroundColor: '#333333',
-            padding: 10
-        }).setOrigin(0.5);
-        botonComando.setInteractive();
-
-        const textarea = this.add.dom(400, 550).createElement('div', 'background-color: #333; padding: 10px; border-radius: 8px; display: none;')
-            .setHTML(
-                `
-                <textarea id="commandInput" 
-                placeholder="Escribe un comando..." 
-                style="padding: 5px; border: none; border-radius: 4px; background-color: #555; color: white; width: 250px; height: 80px; resize: none; color: white;">
-                </textarea>
-
-                <button id="sendBtn" style="padding: 5px 10px; border: none; border-radius: 4px; background-color: #4CAF50; color: white; margin-left: 10px;">Enviar</button>
-                `
-            );
-        const AreaTexto = textarea.node.querySelector('#commandInput');
-        textarea.setVisible(false); 
-        const sendBtn = textarea.node.querySelector('#sendBtn');
+    } else {
+        alert("No tienes esa poción para usar. Inserta una poción primero.");
         
-        botonComando.on('pointerdown', () => {
-            if (textarea.visible) {
-            textarea.setVisible(false);
-            } else {
-                textarea.setVisible(true);
-                textarea.node.querySelector('#commandInput').focus();
-            } 
-        });
-
-        sendBtn.addEventListener('click', () => {
-            const commandInput = textarea.node.querySelector('#commandInput');
-            const command = commandInput.value.toLowerCase().trim();
-            if(command == 'select * from pociones where tipo="pocion1"') {
-    this.duendes.getChildren().forEach(sprite => {
-        if(sprite.enemigoRef && sprite.enemigoRef.vida > 0) {
-            sprite.enemigoRef.recibirAtaque('pocion1');
-            console.log(`¡Has atacado a un duende! Vida restante: ${sprite.enemigoRef.vida}`);
-        }
-    });
+    }
 }
+    
 
-            console.log('Comando enviado:', command);
-            commandInput.value = '';
-            textarea.setVisible(false); 
-        });
+    AreaTexto.value = '';
+    textarea.setVisible(false);
+});
 
-        AreaTexto.addEventListener('focus', () => {
-            this.input.keyboard.enabled = false;
-            this.input.keyboard.manager.enabled = false;
-        });
+// Función para mostrar el siguiente modal según tutorialStep
+const showNextModal = (step) => {
+    let htmlContent = '';
+    tutorialStep++;
 
-        AreaTexto.addEventListener('blur', () => {
-            this.input.keyboard.enabled = true;
-            this.input.keyboard.manager.enabled = true;
-        });
+    if(tutorialStep === 1)
+        htmlContent = `<p>Primero, crea la tabla de pociones:</p><p>Usa: create table pociones (tipo nvarchar(50))</p><button id="btnNext">Continuar</button>`;
+    if(tutorialStep === 2)
+        htmlContent = `<p>Ahora, agrega una pocion:</p><p>Usa: insert into pociones values ("pocion1")</p><button id="btnNext">Continuar</button>`;
+    if(tutorialStep === 3)
+        htmlContent = `<p>Finalmente, haz un SELECT para atacar al duende:</p><p>Usa: select * from pociones where tipo="pocion1"</p><button id="btnNext">Continuar</button>`;
+
+    const modal = this.add.dom(this.cameras.main.width/2, this.cameras.main.height/2)
+        .createElement('div', 'background-color: rgba(0,0,0,0.8); padding:20px; border-radius:10px; color:white; width:400px; text-align:center;')
+        .setHTML(htmlContent);
+
+    const btnNext = modal.node.querySelector('#btnNext');
+    btnNext.addEventListener('click', () => {
+        modal.destroy();
+        if(tutorialStep === 3) textarea.setVisible(true); // activar textarea para el SELECT
+    });
+};
+
 
         
         
+        AreaTexto.addEventListener('focus', () => { this.input.keyboard.enabled = false; });
+AreaTexto.addEventListener('blur', () => { this.input.keyboard.enabled = true; });
 
         this.heroeSprite.setCollideWorldBounds(true);
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -276,45 +345,47 @@ export class Mazmorra1 extends Phaser.Scene {
     
   }
 
-    crearDuende(x, y) {
+    crearDuende(x, y, congelado = false) {
     const duende = new Enemigo('Duende', 10, 'tierra', 10, 'pocion1');
     const sprite = this.physics.add.sprite(x, y, 'duende', 0);
     sprite.setCollideWorldBounds(true);
     sprite.setScale(1.3);
 
     duende.sprite = sprite;
-    sprite.enemigoRef = duende; 
+    sprite.enemigoRef = duende;
     this.duendes.add(sprite);
+    this.duendesActivos.push(duende); // agregamos al array
 
-    // 🔴 Estado para evitar múltiples muertes
     sprite.estaMuerto = false;
+    duende.congelado = congelado;
 
-    // Ataque automático
+    // Ataque automático solo si no está congelado
     duende.attackEvent = this.time.addEvent({
-        delay: 3000,  
+        delay: 8000,
         loop: true,
         callback: () => {
-            if (duende.vida > 0 && !sprite.estaMuerto) {
+            if (duende.vida > 0 && !sprite.estaMuerto && !duende.congelado) {
                 duende.atacar(this.heroe);
                 sprite.play('AnimacionAtaqueDuende');
             }
         }
     });
 
-    // 👉 REVISAR vida periódicamente
+    // Revisar vida periódicamente
     this.time.addEvent({
         delay: 200,
         loop: true,
         callback: () => {
             if (duende.vida <= 0 && !sprite.estaMuerto) {
-                sprite.estaMuerto = true; // marcar como muerto
+                sprite.estaMuerto = true;
                 sprite.play('AnimacionMuerteDuende');
-                
-                // Esperar a que acabe la animación y luego eliminarlo
-                sprite.once('animationcomplete', (anim) => {
-                    if (anim.key === 'AnimacionMuerteDuende') {
-                        sprite.destroy(); // ahora sí lo borramos del juego
-                        console.log("💀 Duende eliminado");
+                sprite.once('animationcomplete', () => {
+                    sprite.destroy();
+                    // cuando muere un duende, generar uno nuevo si no se alcanzó el límite
+                    if (this.duendesActivos.length < this.limiteDuendes) {
+                        const newX = Phaser.Math.Between(100, 700);
+                        const newY = Phaser.Math.Between(100, 500);
+                        this.crearDuende(newX, newY);
                     }
                 });
             }
@@ -323,6 +394,8 @@ export class Mazmorra1 extends Phaser.Scene {
 
     return duende;
 }
+
+
 
 
 
