@@ -144,7 +144,7 @@ skipBtn.on('pointerout', () => {
     
     skipBtn.on('pointerdown', () => {
       console.log('Saltando intro...');
-      this.scene.start('Menu');
+      this.scene.start('EscenaJuego');
     });
 
     // Video events
