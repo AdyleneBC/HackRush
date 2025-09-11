@@ -52,7 +52,7 @@ export class Enemigo {
     }
     recibirAtaque(comando) {
         if(comando==this.debilidad){
-            vida=vida/2;
+            this.vida=this.vida-25;
         }
     }
     atacar(Objetivo){
