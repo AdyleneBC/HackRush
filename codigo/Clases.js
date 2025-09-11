@@ -50,17 +50,4 @@ export class Enemigo {
         this.ataque=ataque;
         this.debilidad=debilidad
     }
-<<<<<<< HEAD
-=======
-    recibirAtaque(comando) {
-        if(comando==this.debilidad){
-            this.vida=this.vida-10;
-        }
-    }
-    atacar(Objetivo){
-        Objetivo.recibirDanio(this.ataque);
-        console.log(`${this.nombre} ataca a ${Objetivo.nombre}`);
-    }
-
->>>>>>> fer
 }
