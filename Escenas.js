@@ -82,7 +82,7 @@ export class EscenaInicio extends Phaser.Scene {
 
     // Click para iniciar
     buttonZone.on('pointerdown', () => {
-        this.scene.start('EscenaJuego');
+        this.scene.start('IntroScene');
     });
 }
 
