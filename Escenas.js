@@ -8,7 +8,22 @@ export class Escena extends Phaser.Scene {
   preload() {
     this.load.image('fondo', 'Assets/fondoInicio.png'); 
     this.load.image('camino', 'Assets/camino.png');
-    this.load.image('heroe', 'Assets/Personaje principal.jpg');
+    this.load.spritesheet('heroe_abajo', 'Assets/abajo_heroe.png', {
+        frameWidth: 135, 
+        frameHeight: 200
+    });
+    this.load.spritesheet('heroe_arriba', 'Assets/arriba_heroe.png', {
+        frameWidth: 135, 
+        frameHeight: 200
+    });
+    this.load.spritesheet('heroe_derecha', 'Assets/derecha_heroe.png', {
+        frameWidth: 135, 
+        frameHeight: 200
+    });
+    this.load.spritesheet('heroe_izquierda', 'Assets/izquierda_heroe.png', {
+        frameWidth: 135, 
+        frameHeight: 200
+    });
     this.load.image('enemigo', 'Assets/Personaje principal.jpg');
    
 
@@ -25,9 +40,37 @@ export class Escena extends Phaser.Scene {
     platforms.create(450, 300, 'camino').setScale(0.05,0.55).refreshBody();
 
     this.heroe = new Personaje(100, 20);
-    this.heroeSprite = this.physics.add.sprite(400, 250, 'heroe');
+    this.heroeSprite = this.physics.add.sprite(400, 250, 'heroe_abajo', 0);
+    this.heroeSprite.setScale(0.5);
+
     this.heroeSprite.setCollideWorldBounds(true);
-    console.log(`El héroe ${this.heroe.nombre} está listo en la escena.`);
+    this.anims.create({
+        key: 'caminar_abajo',
+        frames: this.anims.generateFrameNumbers('heroe_abajo', { frames: [1,2,3]}),
+        frameRate: 8,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'caminar_arriba',
+        frames: this.anims.generateFrameNumbers('heroe_arriba', { frames: [1,2,3]}),
+        frameRate: 8,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'caminar_derecha',
+        frames: this.anims.generateFrameNumbers('heroe_derecha', { frames: [0,2,3]}),
+        frameRate: 8,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'caminar_izquierda',
+        frames: this.anims.generateFrameNumbers('heroe_izquierda', { frames: [0,1,3]}),
+        frameRate: 8,
+        repeat: -1
+    });
 
     this.enemigo = new Enemigo('Orco', 50, 'tierra', 15, 'pocion1');
     this.enemigoSprite = this.physics.add.sprite(500, 400, 'enemigo');
@@ -56,16 +99,21 @@ export class Escena extends Phaser.Scene {
 
     if(this.heroe.vida>0)
     {
-        if (this.cursors.left.isDown) {
+        if(this.cursors.left.isDown) {
             this.heroeSprite.setVelocityX(-160);
-        } else if (this.cursors.right.isDown) {
-            this.heroeSprite.setVelocityX(160); 
-        }
-        if (this.cursors.up.isDown) {
+            this.heroeSprite.anims.play('caminar_izquierda', true);
+        } else if(this.cursors.right.isDown) {
+            this.heroeSprite.setVelocityX(160);
+            this.heroeSprite.anims.play('caminar_derecha', true);
+        } else if(this.cursors.up.isDown) {
             this.heroeSprite.setVelocityY(-160);
-        } else if (this.cursors.down.isDown) {
+            this.heroeSprite.anims.play('caminar_arriba', true);
+        } else if(this.cursors.down.isDown) {
             this.heroeSprite.setVelocityY(160);
-        }    
+            this.heroeSprite.anims.play('caminar_abajo', true);
+        } else {
+        this.heroeSprite.anims.stop(); 
+        }  
     }
     
   }
@@ -77,15 +125,19 @@ export class Mazmorra1 extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('fondo', 'Assets/fondoInicio.png');
-        this.load.spritesheet('duende', 'Assets/duendes.png', {
+        this.load.image('mazmorra1', 'Assets/mazmorra1.jpg');
+        this.load.spritesheet('duende', 'Assets/duende_ataque.png', {
+            frameWidth: 80, 
+            frameHeight: 84
+        });
+        this.load.spritesheet('duende_muerte', 'Assets/duendes.png', {
             frameWidth: 97, 
             frameHeight: 87
         });
     }
 
     create(data) {
-        let bg = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'fondo');
+        let bg = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'mazmorra1');
         bg.displayWidth = this.sys.game.config.width;
         bg.displayHeight = this.sys.game.config.height;
 
@@ -95,18 +147,20 @@ export class Mazmorra1 extends Phaser.Scene {
         this.heroeSprite = this.physics.add.sprite(
             this.cameras.main.width / 2,
             this.cameras.main.height / 2,
-            'heroe'
+            'heroe_abajo',0
         );
+        this.heroeSprite.setScale(0.5);
+
         this.duendes = this.physics.add.group(); 
         this.anims.create({
             key: 'AnimacionAtaqueDuende',
-            frames: this.anims.generateFrameNumbers('duende', { frames: [9,15,14,13,9] }),
+            frames: this.anims.generateFrameNumbers('duende', { frames: [0,1,2,3] }),
             frameRate: 3,
             repeat: 0
         });
         this.anims.create({
             key: 'AnimacionMuerteDuende',
-            frames: this.anims.generateFrameNumbers('duende', { frames: [9,29,29] }),
+            frames: this.anims.generateFrameNumbers('duende_muerte', { frames: [29,29] }),
             frameRate: 0.6,
             repeat: 0
         }); 
@@ -199,25 +253,34 @@ export class Mazmorra1 extends Phaser.Scene {
     }
 
     update(time, delta) {
-        this.heroeSprite.setVelocity(0);
-        if (this.heroe.vida > 0) {
-            if (this.cursors.left.isDown) {
-                this.heroeSprite.setVelocityX(-160);
-            } else if (this.cursors.right.isDown) {
-                this.heroeSprite.setVelocityX(160);
-            }
-            if (this.cursors.up.isDown) {
-                this.heroeSprite.setVelocityY(-160);
-            } else if (this.cursors.down.isDown) {
-                this.heroeSprite.setVelocityY(160);
-            }
-        }
+    this.heroeSprite.setVelocity(0);
+
+    if(this.heroe.vida>0)
+    {
+        if(this.cursors.left.isDown) {
+            this.heroeSprite.setVelocityX(-160);
+            this.heroeSprite.anims.play('caminar_izquierda', true);
+        } else if(this.cursors.right.isDown) {
+            this.heroeSprite.setVelocityX(160);
+            this.heroeSprite.anims.play('caminar_derecha', true);
+        } else if(this.cursors.up.isDown) {
+            this.heroeSprite.setVelocityY(-160);
+            this.heroeSprite.anims.play('caminar_arriba', true);
+        } else if(this.cursors.down.isDown) {
+            this.heroeSprite.setVelocityY(160);
+            this.heroeSprite.anims.play('caminar_abajo', true);
+        } else {
+        this.heroeSprite.anims.stop(); 
+        }  
     }
+    
+  }
 
     crearDuende(x, y) {
     const duende = new Enemigo('Duende', 10, 'tierra', 10, 'pocion1');
-    const sprite = this.physics.add.sprite(x, y, 'duende', 9);
+    const sprite = this.physics.add.sprite(x, y, 'duende', 0);
     sprite.setCollideWorldBounds(true);
+    sprite.setScale(1.3);
 
     duende.sprite = sprite;
     sprite.enemigoRef = duende; 
