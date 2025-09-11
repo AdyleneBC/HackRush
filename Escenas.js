@@ -110,11 +110,8 @@ export class Mazmorra1 extends Phaser.Scene {
                 `
             );
         inputContainer.setVisible(false); 
-
-        // Obtener una referencia al elemento DOM real del botón de enviar
         const sendBtn = inputContainer.node.querySelector('#sendBtn');
 
-        // Evento para abrir el libro: simplemente muestra el contenedor
         botonComando.on('pointerdown', () => {
             if (inputContainer.visible) {
             inputContainer.setVisible(false);
@@ -129,7 +126,7 @@ export class Mazmorra1 extends Phaser.Scene {
             const command = commandInput.value.toLowerCase().trim();
             console.log('Comando enviado:', command);
             commandInput.value = '';
-            inputContainer.setVisible(false); // esconder de nuevo
+            inputContainer.setVisible(false); 
         });
 
         this.heroeSprite.setCollideWorldBounds(true);
