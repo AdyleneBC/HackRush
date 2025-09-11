@@ -3,38 +3,13 @@ export class Personaje {
     this.nombre;
     this.nivel = nivel;
     this.vida = vida;
-    this.medallas=[];
+    this.medallas;
     this.ataque;
-    this.pociones=[];
     this.defensa=0;
   }
   subirNivel() {
     this.nivel += 1;
     console.log(`${this.nombre} ha subido al nivel ${this.nivel}!`);
-  }
-  agregarpocion(pocion){
-    this.pociones.push(pocion);
-    console.log(`Se agregó la poción ${pocion}. Pociones actuales:`, this.pociones);
-
-  }
-  usarPocion(nombrePocion) {
-    const index = this.pociones.findIndex(p => p === nombrePocion);
-    if (index !== -1) {
-      console.log(`Usando la poción ${nombrePocion}`);
-      this.pociones.splice(index, 1); // remover la poción del inventario
-    } else {
-      console.log(`No tienes la poción ${nombrePocion}`);
-    }
-  }
-  buscarPocion(nombrePocion) {
-    const index = this.pociones.findIndex(p => p === nombrePocion);
-    if (index !== -1) {
-      console.log(`Si la tienes ${nombrePocion}`);
-      return true;
-    } else {
-      console.log(`No tienes la poción ${nombrePocion}`);
-      return false;
-    }
   }
   atacar(Objetivo){
     Objetivo.recibirDanio(this.ataque);
