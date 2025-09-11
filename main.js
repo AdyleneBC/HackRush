@@ -1,115 +1,23 @@
-// IntroScene.js - Versión más simple para debugging
-export class IntroScene extends Phaser.Scene {
-  constructor() {
-    super('IntroScene');
+// Archivo: main.js
+import { EscenaInicio, Escena, Mazmorra1 } from './Escenas.js';
+import { IntroScene } from './IntroScene.js';  
+
+const config = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  scene: [EscenaInicio, IntroScene, Escena, Mazmorra1], // Añade tu escena al array
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 0 }, // Establece la gravedad a 0 para que el personaje no caiga
+      debug: true// Cambia a true para ver los cuerpos de las físicas
+    }
+  },
+  parent: 'phaser-game', // opcional si tienes un div
+  dom: {
+    createContainer: true   // 🔥 esto habilita DOM Elements
   }
+};
 
-  preload() {
-    // Cargar video con diferentes eventos
-    this.load.video('intro', 'Assets/intro.mp4');
-    
-    // Preload event listener para debug
-    this.load.on('filecomplete-video-intro', () => {
-      console.log('Video cargado correctamente');
-    });
-    
-    this.load.on('loaderror', (file) => {
-      console.error('Error cargando archivo:', file.key, file.url);
-    });
-  }
-
-  create() {
-    // Usar dimensiones fijas del juego (800x600)
-    const width = 800;
-    const height = 600;
-
-    // Crear video SIN setDisplaySize inicial
-    const video = this.add.video(width / 2, height / 2, 'intro');
-    
-    // Debug
-    console.log('¿Existe la textura del video?', this.textures.exists('intro'));
-    console.log('Video object:', video);
-
-    // Overlay inicial
-    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.8).setOrigin(0);
-    const playText = this.add.text(width / 2, height / 2, 'CLIC PARA REPRODUCIR VIDEO', {
-      fontFamily: 'Arial', // Fuente más básica para debug
-      fontSize: '24px',
-      color: '#ffffff',
-      align: 'center'
-    }).setOrigin(0.5);
-
-    // Botón de saltar - posicionado dentro de los límites del juego
-    const skipBtn = this.add.text(width - 20, height - 20, 'SALTAR', {
-      fontSize: '20px',
-      color: '#ffffff',
-      backgroundColor: '#cc0000',
-      padding: { left: 10, right: 10, top: 5, bottom: 5 }
-    }).setOrigin(1, 1).setInteractive({ useHandCursor: true });
-
-    // Función para iniciar video
-    const startVideo = () => {
-      console.log('Iniciando reproducción...');
-      
-      // Remover overlay
-      overlay.destroy();
-      playText.destroy();
-      
-      // AQUÍ ES DONDE AJUSTAMOS EL TAMAÑO DESPUÉS DE CARGAR
-      this.time.delayedCall(100, () => {
-        // Obtener dimensiones reales del video
-        const videoElement = video.video;
-        if (videoElement) {
-          console.log('Dimensiones originales del video:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-          
-          // Calcular escala para que quepa exactamente en 800x600
-          const scaleX = width / videoElement.videoWidth;
-          const scaleY = height / videoElement.videoHeight;
-          
-          // Opción 1: Usar la escala menor para mantener proporción
-          const scale = Math.min(scaleX, scaleY);
-          video.setScale(scale);
-          
-          // Opción 2: Si quieres que llene toda la pantalla (puede distorsionar)
-          // video.setDisplaySize(width, height);
-          
-          console.log('Escala aplicada:', scale);
-        }
-      });
-      
-      // Intentar reproducir
-      try {
-        video.play();
-        console.log('Video.play() llamado');
-        
-        // Verificar si está reproduciéndose después de un momento
-        this.time.delayedCall(1000, () => {
-          console.log('¿Se está reproduciendo?', video.isPlaying());
-        });
-        
-      } catch (error) {
-        console.error('Error al iniciar video:', error);
-        this.scene.start('EscenaJuego');
-      }
-    };
-
-    // Event listeners
-    this.input.once('pointerdown', startVideo);
-    
-    skipBtn.on('pointerdown', () => {
-      console.log('Saltando intro...');
-      this.scene.start('EscenaJuego');
-    });
-
-    // Video events
-    video.on('play', () => console.log('✅ Video playing'));
-    video.on('complete', () => {
-      console.log('Video completado');
-      this.scene.start('EscenaJuego');
-    });
-    video.on('error', (error) => {
-      console.error('❌ Video error:', error);
-      this.scene.start('EscenaJuego');
-    });
-  }
-}
+const game = new Phaser.Game(config);
