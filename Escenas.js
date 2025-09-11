@@ -1,4 +1,6 @@
+
 import { Personaje, Enemigo } from './Clases.js';
+>>>>>>> fer
 
 export class Escena extends Phaser.Scene {
   constructor() {
@@ -6,6 +8,7 @@ export class Escena extends Phaser.Scene {
   }
 
   preload() {
+
     this.load.image('fondo', 'Assets/fondoInicio.png'); 
     this.load.image('camino', 'Assets/camino.png');
     this.load.spritesheet('heroe_abajo', 'Assets/abajo_heroe.png', {
@@ -26,6 +29,7 @@ export class Escena extends Phaser.Scene {
     });
     this.load.image('enemigo', 'Assets/Personaje principal.jpg');
    
+>>>>>>> fer
 
   }
 
@@ -82,6 +86,7 @@ export class Escena extends Phaser.Scene {
 
     const botonMazmorra1 = this.add.text(400, 100, 'Mazmorra1', { 
         fontSize: '18px', 
+>>>>>>> fer
         fill: '#fff',
         backgroundColor: '#8B0000', 
         padding: 10
@@ -91,6 +96,7 @@ export class Escena extends Phaser.Scene {
         this.scene.start('Mazmorra1', {
         personaje: this.heroe,
         });
+>>>>>>> fer
     });
   }
 
@@ -98,26 +104,46 @@ export class Escena extends Phaser.Scene {
     this.heroeSprite.setVelocity(0);
 
     if(this.heroe.vida>0)
+>>>>>>> fer
     {
         if(this.cursors.left.isDown) {
             this.heroeSprite.setVelocityX(-160);
+<<<<<<< HEAD
+        } else if (this.cursors.right.isDown) {
+            this.heroeSprite.setVelocityX(160); 
+        }
+        if (this.cursors.up.isDown) {
+<<<<<<< HEAD
+            this.heroeSprite.setVelocityY(-160); // Mueve hacia arriba
+        } else if (this.cursors.down.isDown) {
+            this.heroeSprite.setVelocityY(160); // Mueve hacia abajo
+=======
+=======
             this.heroeSprite.anims.play('caminar_izquierda', true);
         } else if(this.cursors.right.isDown) {
             this.heroeSprite.setVelocityX(160);
             this.heroeSprite.anims.play('caminar_derecha', true);
         } else if(this.cursors.up.isDown) {
+>>>>>>> fer
             this.heroeSprite.setVelocityY(-160);
             this.heroeSprite.anims.play('caminar_arriba', true);
         } else if(this.cursors.down.isDown) {
             this.heroeSprite.setVelocityY(160);
+<<<<<<< HEAD
+>>>>>>> fer
+        }    
+=======
             this.heroeSprite.anims.play('caminar_abajo', true);
         } else {
         this.heroeSprite.anims.stop(); 
         }  
+>>>>>>> fer
     }
     
   }
 }
+<<<<<<< HEAD
+=======
 
 export class Mazmorra1 extends Phaser.Scene {
     constructor() {
@@ -401,3 +427,4 @@ AreaTexto.addEventListener('blur', () => { this.input.keyboard.enabled = true; }
 
 }
 
+>>>>>>> fer
